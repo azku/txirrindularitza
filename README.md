@@ -11,3 +11,11 @@ Programaren lehenengo bertsion honek, direktorio batean dauden argazkiak aztertz
 
 Aurreko zerrendan izendatutako obketuen bat aurkitu ezkero, ``detekzio_emaitzak.csv`` izeneko fitxategi batean ateratzen dira emaitzak.
 Emaitzetan, irudiaren helbidea, balio mota, konfiantza eta objectuaren detekzio mugak aterako dira.
+
+## Aurre-ezarpenak
+Argazki originalak direktorio batean egon beharko dira. Kode hau exekutatzeko, python ingurune bat izan beharko dugu  Ultralyticsen YOLO v8 eta ``imutils`` paketeak instalatuta daudelarik. 
+
+Programak, helburu bezala konfiguratu daitekeen direktorio batean irudiak iraulita kopiatzen ditu. Ondoren objektuak identifikatzeko modeloa aplikatzen zaie eta irudi bakoitzaren emaitzak ``detekzio_emaitzak.csv`` izeneko fitxategian utziko dira helburu direktorio horretan. Irudiei detekzioak marraztuko zaizkie.
+
+
+
