@@ -1,0 +1,30 @@
+services:
+
+  wordpress:
+    image: wordpress
+    restart: always
+    container_name: wordpress
+    ports:
+      - 8080:80
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: txirrindularia
+      WORDPRESS_DB_PASSWORD: txirrindularia_2024_2025
+      WORDPRESS_DB_NAME: txirrindularitza_db
+    volumes:
+      - wordpress:/var/www/html
+      - ./uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_DATABASE: txirrindularitza_db
+      MYSQL_USER: txirrindularia
+      MYSQL_PASSWORD: txirrindularia_2024_2025
+      MYSQL_RANDOM_ROOT_PASSWORD: '1'
+    volumes:
+      - db:/var/lib/mysql
+
+volumes:
+  wordpress:
+  db:
