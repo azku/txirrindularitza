@@ -17,5 +17,5 @@ Argazki originalak direktorio batean egon beharko dira. Kode hau exekutatzeko, p
 
 Programak, helburu bezala konfiguratu daitekeen direktorio batean irudiak iraulita kopiatzen ditu. Ondoren objektuak identifikatzeko modeloa aplikatzen zaie eta irudi bakoitzaren emaitzak ``detekzio_emaitzak.csv`` izeneko fitxategian utziko dira helburu direktorio horretan. Irudiei detekzioak marraztuko zaizkie.
 
-
+## Matrikula entrenamendua
 
