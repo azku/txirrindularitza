@@ -16,7 +16,20 @@ IRTEERA_DIREKTORIOA = '../data/wpcf7-files/out'
 #     Path(oraingo_direktorioa + "/out").mkdir(parents=True, exist_ok=True)
 #     return irteera_direktorioa
 
+def direktorioko_irudiak_igaro_eraldatu(sarrera_direktorioa,irteera_izena, albo_ondorioa):
+    for uneko_fitxategia in os.listdir(sarrera_direktorioa):
+        img_path = os.path.join(sarrera_direktorioa, uneko_fitxategia)
+        irteera_direktorioa = sarrera_direktorioa + "/" + irteera_izena
+        #Ziurtatu existitzen dala
+        Path(irteera_direktorioa).mkdir(parents=True, exist_ok=True)
+        if img_path.lower().endswith(('.png', '.jpg', '.jpeg')):
+            albo_ondorioa(uneko_fitxategia, irteera_direktorioa)
 
+def argazkiei_buelta_eman(sarrera_direktiorioa, irteera_izena):
+    direktorioko_irudiak_igaro_eraldatu(sarrera_direktiorioa, irteera_izena, argazkiari_buelta_eman)
+def argazkiari_buelta_eman(uneko_fitxategia, irteera_direktorioa):
+    print("Buelta ematen")
+    
 def argazkiari_buelta_eman(irudiaren_bide_izena):
     burua_fitxategia = os.path.split(irudiaren_bide_izena)
     helburu_bide_izena = IRTEERA_DIREKTORIOA + "/" + burua_fitxategia[1]  
@@ -37,11 +50,11 @@ def identifikatu_izeneko_datuak(filename):
     return (s[1],s[2],s[3]) #miliseconds, random, distance
 
 def matrikula_detekzioa(detekzio_irudia):
-    m_results = matrikula_modeloa.predict(iraulitako_irudi_bidea, verbose=False)
+    m_results = matrikula_modeloa.predict(detekzio_irudia, verbose=False)
     m_detections = m_results[0].boxes
     for det in m_detections:
         x1, y1, x2, y2 = map(int, det[0].xyxy[0])
-        if  det.conf[0]>0.8:
+        if  det.conf[0]>0.3:
             cv2.rectangle(detekzio_irudia, (x1, y1), (x2, y2), (0, 0, 255), 2)
             cv2.putText(detekzio_irudia, f"{m_results[0].names[int(det.cls)]} ({ det.conf[0].numpy()})", (x1, y1 +20), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
         
@@ -68,7 +81,7 @@ for filename in os.listdir(IRUDIEN_DIREKTORIOA):
                     cv2.putText(detekzio_irudia, results[0].names[int(det.cls)], (x1, y1 +20), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
                 else:
                     detekzio_irudia = cv2.rectangle(results[0].orig_img, (x1, y1), (x2, y2), (255, 0, 0), 2)
-                    cv2.putText(detekzio_irudia, results[0].names[int(det.cls)], (x1, y1 +20), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
+                    #cv2.putText(detekzio_irudia, results[0].names[int(det.cls)], (x1, y1 +20), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
                 if int(det.cls)  in [2, 3, 5, 7 ]: #[car, mortorcycle, bus, truck]
                     #matrikula detekzioa
                     matrikula_detekzioa(detekzio_irudia)
