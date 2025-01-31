@@ -1,29 +1,27 @@
 import curses
-import irudi_eraldaketak
+import main_program
 import os
 
 SARRERA_DIREKTORIOA = '../data/wpcf7-files'
 
 def option_one(stdscr):
-    irudi_eraldaketak.argazkiei_buelta_eman(SARRERA_DIREKTORIOA, "buelta_emanda")
+    main_program.argazkiei_buelta_eman()
     stdscr.clear()
     stdscr.addstr(0, 0, "Argazkiei buelta emanda. Zapaldu edozein tekla jarraitzeko...")
     stdscr.refresh()
     stdscr.getch()
 
 def option_two(stdscr):
-    for p in irudi_eraldaketak.predikzioak_burutu('../data/wpcf7-files/buelta_emanda', "license_plate_detector.pt"):
-        burua_fitxategia = os.path.split(p["fitxategi_helbide_osoa"])
-        helburu_bide_izena = '../data/wpcf7-files/out' + "/" + burua_fitxategia[1]
-        irudi_eraldaketak.detekzioak_margoztu(p["irudi_originala"], p["x1"], p["y1"], p["x2"], p["y2"], p["etiketa"], str(p["konfiantza"]), helburu_bide_izena)
+    main_program.buelta_emandako_predikzioak_margoztu()
     stdscr.clear()
-    stdscr.addstr(0, 0, "You chose Option 2.")
+    stdscr.addstr(0, 0, "Predikzioak margoztu dira")
     stdscr.refresh()
     stdscr.getch()
 
 def option_three(stdscr):
+    main_program.buelta_emandako_predikzioak_esportatu()
     stdscr.clear()
-    stdscr.addstr(0, 0, "You chose Option 3.")
+    stdscr.addstr(0, 0, "Predikzioak CSV-ra esportatu")
     stdscr.refresh()
     stdscr.getch()
 
@@ -37,8 +35,8 @@ def show_menu(stdscr):
     stdscr.clear()  # Clear screen to avoid refreshing issues
     stdscr.addstr(0, 0, "--- Menu Nagusia ---")
     stdscr.addstr(1, 0, "1. Sarrerako argazkieki buelta eman")
-    stdscr.addstr(2, 0, "2. ")
-    stdscr.addstr(3, 0, "3. Option 3")
+    stdscr.addstr(2, 0, "2. Predikzioak margoztu")
+    stdscr.addstr(3, 0, "3. Predikzioak dataframean itzuli")
     stdscr.addstr(4, 0, "4. Exit")
     stdscr.refresh()
 
