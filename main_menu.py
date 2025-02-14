@@ -2,7 +2,7 @@ import curses
 import main_program
 import os
 
-SARRERA_DIREKTORIOA = '../data/wpcf7-files'
+
 
 def option_one(stdscr):
     main_program.argazkiei_buelta_eman()
@@ -25,6 +25,13 @@ def option_three(stdscr):
     stdscr.refresh()
     stdscr.getch()
 
+def option_four(stdscr):
+    main_program.buelta_emandako_predikzioak_margoztu_obb()
+    stdscr.clear()
+    stdscr.addstr(0, 0, "Predikzioak margoztu dira")
+    stdscr.refresh()
+    stdscr.getch()
+
 def exit_program(stdscr):
     stdscr.clear()
     stdscr.addstr(0, 0, "Exiting the program...")
@@ -37,7 +44,8 @@ def show_menu(stdscr):
     stdscr.addstr(1, 0, "1. Sarrerako argazkieki buelta eman")
     stdscr.addstr(2, 0, "2. Predikzioak margoztu")
     stdscr.addstr(3, 0, "3. Predikzioak dataframean itzuli")
-    stdscr.addstr(4, 0, "4. Exit")
+    stdscr.addstr(4, 0, "4. OBB predikzioak margoztu")
+    stdscr.addstr(5, 0, "5. Exit")
     stdscr.refresh()
 
 def main(stdscr):
@@ -49,7 +57,8 @@ def main(stdscr):
         "1": option_one,
         "2": option_two,
         "3": option_three,
-        "4": exit_program
+        "4": option_four,
+        "5": exit_program
     }
 
     while True:
