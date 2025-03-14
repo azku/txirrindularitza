@@ -5,7 +5,8 @@ from pathlib import Path
 from itertools import chain
 from ultralytics import YOLO
 import numpy
-
+import argazkien_metadatoak_ekarri as arg_meta
+import pandas as pd
 
 def get_direktorioko_irudiak(sarrera_direktorioa):
     irudien_lista = filter(lambda x: os.path.join(sarrera_direktorioa, x).lower().endswith(('.png', '.jpg', '.jpeg')),
@@ -31,7 +32,7 @@ def argazkiari_buelta_eman(fitxategi_helbide_osoa, irteera_direktorioa):
     burua_fitxategia = os.path.split(fitxategi_helbide_osoa)
     helburu_bide_izena = irteera_direktorioa + "/" + burua_fitxategia[1]
     irudia = cv2.imread(fitxategi_helbide_osoa, cv2.IMREAD_IGNORE_ORIENTATION | cv2.IMREAD_COLOR)
-    iraulitako_irudia =    imutils.rotate(irudia, angle=180)
+    iraulitako_irudia =    imutils.rotate(irudia, angle=90)
     cv2.imwrite(helburu_bide_izena, iraulitako_irudia)
 
 def predikzioak_burutu(sarrera_direktorioa, modeloaren_izena, mozketa_azalera=200000):
@@ -144,17 +145,28 @@ def predikzioak_margoztu(predikzio_hiztegia, sarrera_direktorio_helbidea, irteer
             helburu_bide_izena = helburu_direktorio_helbidea + "/" + helbide_zatitua[1]
             predikzioa_margoztu(p['irudi_originala'], p["x1"], p["y1"], p["x2"], p["y2"], p["etiketa"], p["konfiantza"], helburu_bide_izena)
 
+def identifikatu_izeneko_datuak(filename):
+    s = filename.split('_')
+    return (s[1],s[2],s[3]) #miliseconds, random, distance
+
 def predikzioak_dataframe_bihurtu(predikzio_hiztegia):
     metadatu_hiztegia = arg_meta.get_picture_metadata()
     df_lista = []
     for p in predikzio_hiztegia:
         helbide_zatitua = os.path.split(p["fitxategi_helbide_osoa"])
         ml, rd, dist = identifikatu_izeneko_datuak(helbide_zatitua[1])
-        metadatuak = metadatu_hiztegia[helbide_zatitua[1]]
+        if helbide_zatitua[1] in metadatu_hiztegia:
+            metadatuak = metadatu_hiztegia[helbide_zatitua[1]]
+        else:
+            print(f"EZ da aurkitu {helbide_zatitua}")
+            metadatuak = {"id": None, "date": None, "time": None, "route": None}
+        # df_lista.append({"id": metadatuak["id"], "date": metadatuak["date"], "time": metadatuak["time"], "route": metadatuak["route"],
+        #                  'miliseconds': ml, 'distance': dist, 'image_path': p["fitxategi_helbide_osoa"],
+        #                  'confidence':str(p["konfiantza"]) , 'type': p["etiketa"], 'bb_x1': p["x1"], 'bb_y1': p["x2"],
+        #                  'bb_x2': p["x2"], 'bb_y2': p["y2"], 'area': (p["x2"] - p["x1"]) * (p["y2"] - p["y1"])})
         df_lista.append({"id": metadatuak["id"], "date": metadatuak["date"], "time": metadatuak["time"], "route": metadatuak["route"],
                          'miliseconds': ml, 'distance': dist, 'image_path': p["fitxategi_helbide_osoa"],
-                         'confidence':str(p["konfiantza"]) , 'type': p["etiketa"], 'bb_x1': p["x1"], 'bb_y1': p["x2"],
-                         'bb_x2': p["x2"], 'bb_y2': p["y2"], 'area': (p["x2"] - p["x1"]) * (p["y2"] - p["y1"])})
+                         'confidence':str(p["konfiantza"]) , 'type': p["etiketa"], 'bb_x1': p["coord"]})
     return pd.DataFrame(df_lista)
         
 # def detekzioak_margoztu(predikzio_emaitza, irudia_helbide_osoa, irteera_helbide_osoa, mozketa_azalera=200000):

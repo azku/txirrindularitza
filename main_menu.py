@@ -75,6 +75,8 @@ def main(stdscr):
             menu_options['3'](stdscr)
         elif choice == ord('4'):
             menu_options['4'](stdscr)
+        elif choice == ord('5'):
+            menu_options['5'](stdscr)
             break  # Exit the program after 'Exit' option is selected
         else:
             stdscr.clear()

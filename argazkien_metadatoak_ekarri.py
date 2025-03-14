@@ -3,8 +3,6 @@ import mysql.connector
 from mysql.connector import Error
 
 
-ARGAZKIEN_ERROA = "/home/ir_inf/data/wpcf7-files/out"
-
 def create_connection(host_name, user_name, user_password, db_name):
     connection = None
     try:
