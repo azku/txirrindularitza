@@ -19,14 +19,21 @@ def option_two(stdscr):
     stdscr.getch()
 
 def option_three(stdscr):
-    main_program.buelta_emandako_predikzioak_esportatu()
+    main_program.buelta_emandako_predikzioak_margoztu_obb()
     stdscr.clear()
-    stdscr.addstr(0, 0, "Predikzioak CSV-ra esportatu")
+    stdscr.addstr(0, 0, "OBB Predikzioak margoztu dira")
     stdscr.refresh()
     stdscr.getch()
 
 def option_four(stdscr):
-    main_program.buelta_emandako_predikzioak_margoztu_obb()
+    main_program.buelta_emandako_predikzioak_esportatu()
+    stdscr.clear()
+    stdscr.addstr(0, 0, "Predikzioak margoztu dira")
+    stdscr.refresh()
+    stdscr.getch()
+
+def option_five(stdscr):
+    main_program.buelta_emandako_predikzioak_esportatu_obb()
     stdscr.clear()
     stdscr.addstr(0, 0, "Predikzioak margoztu dira")
     stdscr.refresh()
@@ -43,9 +50,10 @@ def show_menu(stdscr):
     stdscr.addstr(0, 0, "--- Menu Nagusia ---")
     stdscr.addstr(1, 0, "1. Sarrerako argazkieki buelta eman")
     stdscr.addstr(2, 0, "2. Predikzioak margoztu")
-    stdscr.addstr(3, 0, "3. Predikzioak dataframean itzuli")
-    stdscr.addstr(4, 0, "4. OBB predikzioak margoztu")
-    stdscr.addstr(5, 0, "5. Exit")
+    stdscr.addstr(3, 0, "3. OBB predikzioak margoztu")
+    stdscr.addstr(4, 0, "4. Predikzioak dataframean itzuli")
+    stdscr.addstr(5, 0, "5. Predikzioak dataframean itzuli OBB")
+    stdscr.addstr(6, 0, "6. Exit")
     stdscr.refresh()
 
 def main(stdscr):
@@ -58,7 +66,8 @@ def main(stdscr):
         "2": option_two,
         "3": option_three,
         "4": option_four,
-        "5": exit_program
+        "5": option_five,
+        "6": exit_program
     }
 
     while True:
@@ -77,6 +86,8 @@ def main(stdscr):
             menu_options['4'](stdscr)
         elif choice == ord('5'):
             menu_options['5'](stdscr)
+        elif choice == ord('6'):
+            menu_options['6'](stdscr)
             break  # Exit the program after 'Exit' option is selected
         else:
             stdscr.clear()
