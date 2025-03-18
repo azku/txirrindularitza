@@ -86,9 +86,9 @@ def predikzioak_margoztu_obb(predikzio_hiztegia, sarrera_direktorio_helbidea, ir
             predikzioa_margoztu_obb(p['irudi_originala'], p["coord"], p["etiketa"], p["konfiantza"], helburu_bide_izena)    
 
 def predikzioa_margoztu(irudi_originala, x1, y1, x2, y2, etiketa, konfiantza, irteera_helbidea):
-    detekzio_irudia = cv2.rectangle(irudi_originala, (x1, y1), (x2, y2), (0, 255, 0), 2)
-    cv2.putText(detekzio_irudia, etiketa, (x1, y1 +20), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-    cv2.putText(detekzio_irudia, str(round(konfiantza,2)), (x1, y1 +50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+    detekzio_irudia = cv2.rectangle(irudi_originala, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 2)
+    cv2.putText(detekzio_irudia, etiketa, (int(x1), int(y1) +20), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+    cv2.putText(detekzio_irudia, str(round(konfiantza,2)), (int(x1), int(y1) +50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
     cv2.imwrite(irteera_helbidea, detekzio_irudia)
 
 def predikzioak_margoztu(predikzio_hiztegia, sarrera_direktorio_helbidea, irteera_direktorio_izena, konfiantza_minimoa=0.4):
@@ -98,7 +98,7 @@ def predikzioak_margoztu(predikzio_hiztegia, sarrera_direktorio_helbidea, irteer
         if p["konfiantza"]>0.4:
             helbide_zatitua = os.path.split(p["fitxategi_helbide_osoa"])
             helburu_bide_izena = helburu_direktorio_helbidea + "/" + helbide_zatitua[1]
-            predikzioa_margoztu(p['irudi_originala'], p["x1"], p["y1"], p["x2"], p["y2"], p["etiketa"], p["konfiantza"], helburu_bide_izena)
+            predikzioa_margoztu(p['irudi_originala'], p['coord'][0], p['coord'][1], p['coord'][2], p["coord"][3], p["etiketa"], p["konfiantza"], helburu_bide_izena)
 
 def identifikatu_izeneko_datuak(filename):
     s = filename.split('_')
@@ -170,19 +170,4 @@ def draw_label_and_confidence_4points(image, label, confidence, points):
     cv2.putText(image, label_text, (text_x, text_y), font, font_scale, color, thickness, lineType=cv2.LINE_AA)
 
     return image
-
-
-# def detekzioak_margoztu(predikzio_emaitza, irudia_helbide_osoa, irteera_helbide_osoa, mozketa_azalera=200000):
-#     for det in predikzio_emaitza.boxes:
-#         if int(det.cls)  in [0, 1, 2, 3, 5, 7 ]: #[person, bicycle, car, mortorcycle, bus, truck]
-#             x1, y1, x2, y2 = map(int, det[0].xyxy[0])  # det.xyxy gives the box coordinates
-#             bb_azalera = (x2 - x1) * (y2 - y1)
-#             detekzio_irudia = None
-#             if bb_azalera > mozketa_azalera:
-#                 #bounding box bigenough. If object is car den size should be bigger than...
-#                 detekzio_irudia = cv2.rectangle(predikzio_emaitza.orig_img, (x1, y1), (x2, y2), (0, 255, 0), 2)
-#                 cv2.putText(detekzio_irudia, predikzio_emaitza.names[int(det.cls)], (x1, y1 +20), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-#                 cv2.putText(detekzio_irudia, str(round(float(det.conf),2)), (x1, y1 +50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-#                 cv2.imwrite(irteera_helbide_osoa, detekzio_irudia)
-
 

@@ -5,7 +5,7 @@ import tempfile
 import irudi_eraldaketak
 
 
-SARRERA_DIREKTORIOA = '../data/wpcf7-files'
+SARRERA_DIREKTORIOA = '~/data/otsaileko_398'
 class TestIrudiEraldaketak(unittest.TestCase):
     
     def setUp(self):
