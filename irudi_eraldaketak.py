@@ -22,17 +22,17 @@ def direktorioko_irudiak_igaro_eraldatu(sarrera_direktorioa,irteera_izena, albo_
         if fitxategi_helbide_osoa.lower().endswith(('.png', '.jpg', '.jpeg')):
             albo_ondorioa(fitxategi_helbide_osoa, irteera_direktorioa)
 
-def argazkiei_buelta_eman(sarrera_direktorioa, irteera_izena):
+def argazkiei_buelta_eman(sarrera_direktorioa, irteera_izena, anguloa=180):
     irteera_direktorioa = sarrera_direktorioa + "/" + irteera_izena
     Path(irteera_direktorioa).mkdir(parents=True, exist_ok=True)
     for fitxategi_helbide_osoa in get_direktorioko_irudiak(sarrera_direktorioa):
-        argazkiari_buelta_eman(fitxategi_helbide_osoa,  irteera_direktorioa)
+        argazkiari_buelta_eman(fitxategi_helbide_osoa,  irteera_direktorioa, anguloa)
 
-def argazkiari_buelta_eman(fitxategi_helbide_osoa, irteera_direktorioa):
+def argazkiari_buelta_eman(fitxategi_helbide_osoa, irteera_direktorioa, anguloa=180):
     burua_fitxategia = os.path.split(fitxategi_helbide_osoa)
     helburu_bide_izena = irteera_direktorioa + "/" + burua_fitxategia[1]
     irudia = cv2.imread(fitxategi_helbide_osoa, cv2.IMREAD_IGNORE_ORIENTATION | cv2.IMREAD_COLOR)
-    iraulitako_irudia =    imutils.rotate(irudia, angle=90)
+    iraulitako_irudia =    imutils.rotate(irudia, angle=anguloa)
     cv2.imwrite(helburu_bide_izena, iraulitako_irudia)
 
 def predikzioak_burutu(sarrera_direktorioa, modeloaren_izena, mozketa_azalera=200000):
@@ -40,15 +40,15 @@ def predikzioak_burutu(sarrera_direktorioa, modeloaren_izena, mozketa_azalera=20
     def predikzioa_burutu(fitxategi_helbide_osoa):
         predikzio_emaitza = model.predict(fitxategi_helbide_osoa, verbose=False)[0]
         for det in  predikzio_emaitza.boxes:
-            if int(det.cls)  in [0, 1, 2, 3, 5, 7 ]:
-                x1, y1, x2, y2 = map(int, det[0].xyxy[0])  # det.xyxy gives the box coordinates
-                bb_azalera = (x2 - x1) * (y2 - y1)
-                yield {"fitxategi_helbide_osoa":fitxategi_helbide_osoa,
-                       "irudi_originala": predikzio_emaitza.orig_img,
-                       "konfiantza": float(det.conf),
-                       "etiketa":  predikzio_emaitza.names[int(det.cls)],
-                       "x1": x1, "y1":y1, "x2": x2, "y2":y2,
-                       "bb_azalera": bb_azalera}
+            #if int(det.cls)  in [0, 1, 2, 3, 5, 7 ]:
+            x1, y1, x2, y2 = map(int, det[0].xyxy[0])  # det.xyxy gives the box coordinates
+            bb_azalera = (x2 - x1) * (y2 - y1)
+            yield {"fitxategi_helbide_osoa":fitxategi_helbide_osoa,
+                   "irudi_originala": predikzio_emaitza.orig_img,
+                   "konfiantza": float(det.conf),
+                   "etiketa":  predikzio_emaitza.names[int(det.cls)],
+                   "x1": x1, "y1":y1, "x2": x2, "y2":y2,
+                   "bb_azalera": bb_azalera}
     return chain.from_iterable(map(predikzioa_burutu, get_direktorioko_irudiak(sarrera_direktorioa)))
 
 def predikzioak_burutu_obb(sarrera_direktorioa, modeloaren_izena, mozketa_azalera=200000):
@@ -56,15 +56,15 @@ def predikzioak_burutu_obb(sarrera_direktorioa, modeloaren_izena, mozketa_azaler
     def predikzioa_burutu(fitxategi_helbide_osoa):
         predikzio_emaitza = model.predict(fitxategi_helbide_osoa, verbose=False)[0]
         for det in  predikzio_emaitza.obb:
-            if int(det.cls)  in [0, 1, 2, 3, 5, 7 ]:
-                #a1, a1, a3, a4 =  det[0].xyxyxyxy[0].detach().numpy()
-                #bb_azalera = (x2 - x1) * (y2 - y1)
-                yield {"fitxategi_helbide_osoa": fitxategi_helbide_osoa,
-                       "irudi_originala": predikzio_emaitza.orig_img,
-                       "konfiantza": float(det.conf),
-                       "etiketa":  predikzio_emaitza.names[int(det.cls)],
-                       "coord": det.xyxyxyxy[0].detach().numpy(),
-                       "bb_azalera": 0}
+            #if int(det.cls)  in [0, 1, 2, 3, 5, 7 ]:
+            #a1, a1, a3, a4 =  det[0].xyxyxyxy[0].detach().numpy()
+            #bb_azalera = (x2 - x1) * (y2 - y1)
+            yield {"fitxategi_helbide_osoa": fitxategi_helbide_osoa,
+                   "irudi_originala": predikzio_emaitza.orig_img,
+                   "konfiantza": float(det.conf),
+                   "etiketa":  predikzio_emaitza.names[int(det.cls)],
+                   "coord": det.xyxyxyxy[0].detach().numpy(),
+                   "bb_azalera": 0}
     return chain.from_iterable(map(predikzioa_burutu, get_direktorioko_irudiak(sarrera_direktorioa)))
 
 def draw_label_and_confidence_4points(image, label, confidence, points):

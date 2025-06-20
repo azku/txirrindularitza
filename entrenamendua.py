@@ -4,9 +4,10 @@ import pandas as pd
 from glob import glob
 import shutil
 from ultralytics import YOLO
+from pathlib import Path
 
-DATA_PATH = "/home/ir_inf/02_13_entrenamendua_OBB"
-TRAINING_PATH = "/home/ir_inf/entrenamendua_dataset_OBB"
+DATA_PATH = "/home/ir_inf/txirrindularitza_600" #"/home/ir_inf/02_13_entrenamendua_OBB"
+TRAINING_PATH = "/home/ir_inf/txirrindularitza_600" #"/home/ir_inf/entrenamendua_dataset_OBB"
 
 def entrenatu():
     # Load a model
@@ -17,14 +18,22 @@ def entrenatu():
     #results = model.train(data="../data/matrikulak_entrenatzeko/data.yaml",  epochs=50, task="detect", workers=1)
     #results = model.train(data="/home/ir_inf/data/matrikulak_entrenatzeko_gureak2/data.yaml",  epochs=20)
     #results = model.train(data="/home/ir_inf/data/License Plate.v8i.yolov8/data.yaml",  epochs=50)
-    results = model.train(data=f"{TRAINING_PATH}/data.yaml",  epochs=200)
+    results = model.train(data=f"{TRAINING_PATH}/data.yaml",  epochs=200, batch=16)
 
 def label_studio_export_zatitu():
 
     # Load exported data
     txts = glob(DATA_PATH + '/**/*.txt')
     images = glob(DATA_PATH + '/**/*.jpg') + glob(DATA_PATH + '/**/*.png')
+    txts_basenames = [os.path.basename(l) for l in txts]
 
+    #delete images with no labels
+    for i in images:
+        images_label_equivalent =  os.path.basename(Path(i).with_suffix('.txt'))
+        if images_label_equivalent not in txts_basenames:
+            Path.unlink(i)
+            images.remove(i)
+            
     # Create DataFrame
     df = pd.DataFrame({'txt': txts, 'image': images})
 
