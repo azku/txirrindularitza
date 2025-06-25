@@ -1,0 +1,37 @@
+- hosts: all
+  become: True
+  become_user: root
+  vars:
+    environment_path : /home/ir_inf/.venv
+
+  tasks:
+    - name: Sistema eguneratu
+      ansible.builtin.apt:
+        upgrade: yes
+        update_cache: yes
+        
+    - name: Eguneratu APT package manager repositories cache
+      become: true
+      apt:
+        update_cache: yes
+
+    - name: Install Python3 and python3-venv (if not already installed)
+      ansible.builtin.apt:
+        name:
+          - python3
+          - python3-venv
+          - python3-pip  # Ensures pip is installed on the system
+          - unzip
+        state: present
+        update_cache: yes
+        
+    - name: Create Python virtual environment
+      ansible.builtin.shell:
+        cmd: python3 -m venv "{{ environment_path }}"
+        creates: "{{ environment_path }}/bin/activate"
+      args:
+        executable: /bin/bash
+    - name: Install bottle into the specified (virtualenv), inheriting none of the globally installed modules
+      ansible.builtin.pip:
+        name: label-studio
+        virtualenv: /my_app/venv
