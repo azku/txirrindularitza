@@ -5,9 +5,10 @@ from glob import glob
 import shutil
 from ultralytics import YOLO
 from pathlib import Path
+import albumentations as A
 
 DATA_PATH = "/home/ir_inf/txirrindularitza_600" #"/home/ir_inf/02_13_entrenamendua_OBB"
-TRAINING_PATH = "/home/ir_inf/txirrindularitza_600" #"/home/ir_inf/entrenamendua_dataset_OBB"
+TRAINING_PATH = "/home/asier/Documents/txirrindularitza/txirrindularitza_600" #"/home/ir_inf/entrenamendua_dataset_OBB"
 
 def entrenatu():
     # Load a model
@@ -18,6 +19,12 @@ def entrenatu():
     #results = model.train(data="../data/matrikulak_entrenatzeko/data.yaml",  epochs=50, task="detect", workers=1)
     #results = model.train(data="/home/ir_inf/data/matrikulak_entrenatzeko_gureak2/data.yaml",  epochs=20)
     #results = model.train(data="/home/ir_inf/data/License Plate.v8i.yolov8/data.yaml",  epochs=50)
+
+    custom_transforms = [
+    A.Blur(blur_limit=7, p=0.5),
+    A.CLAHE(clip_limit=4.0, p=0.5),
+    ]
+    
     results = model.train(data=f"{TRAINING_PATH}/data.yaml",  epochs=200, batch=16)
 
 def label_studio_export_zatitu():

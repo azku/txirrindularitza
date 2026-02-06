@@ -5,7 +5,6 @@ from pathlib import Path
 from itertools import chain
 from ultralytics import YOLO
 import numpy
-import argazkien_metadatoak_ekarri as arg_meta
 import pandas as pd
 
 def get_direktorioko_irudiak(sarrera_direktorioa):
@@ -40,7 +39,6 @@ def predikzioak_burutu(sarrera_direktorioa, modeloaren_izena, mozketa_azalera=20
     def predikzioa_burutu(fitxategi_helbide_osoa):
         predikzio_emaitza = model.predict(fitxategi_helbide_osoa, verbose=False)[0]
         for det in  predikzio_emaitza.boxes:
-<<<<<<< HEAD
             #if int(det.cls)  in [0, 1, 2, 3, 5, 7 ]:
             x1, y1, x2, y2 = map(int, det[0].xyxy[0])  # det.xyxy gives the box coordinates
             bb_azalera = (x2 - x1) * (y2 - y1)
@@ -50,18 +48,6 @@ def predikzioak_burutu(sarrera_direktorioa, modeloaren_izena, mozketa_azalera=20
                    "etiketa":  predikzio_emaitza.names[int(det.cls)],
                    "x1": x1, "y1":y1, "x2": x2, "y2":y2,
                    "bb_azalera": bb_azalera}
-=======
-            if int(det.cls)  in [0, 1, 2, 3, 5, 7 ]:
-                #x1, y1, x2, y2 = map(int, det[0].xyxy[0])  # det.xyxy gives the box coordinates
-                #bb_azalera = (x2 - x1) * (y2 - y1)
-                yield {"fitxategi_helbide_osoa":fitxategi_helbide_osoa,
-                       "irudi_originala": predikzio_emaitza.orig_img,
-                       "konfiantza": float(det.conf),
-                       "etiketa":  predikzio_emaitza.names[int(det.cls)],
-                       #"x1": x1, "y1":y1, "x2": x2, "y2":y2,
-                       "coord": det[0].xyxy[0].detach().numpy(),
-                       "bb_azalera": 0}
->>>>>>> 0d9b8cae651b3624dbfce3f81042d4128286b1b1
     return chain.from_iterable(map(predikzioa_burutu, get_direktorioko_irudiak(sarrera_direktorioa)))
 
 def predikzioak_burutu_obb(sarrera_direktorioa, modeloaren_izena, mozketa_azalera=200000):
