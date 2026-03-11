@@ -6,6 +6,11 @@ from itertools import chain
 from ultralytics import YOLO
 import numpy
 import pandas as pd
+import pytesseract
+import easyocr
+import matrikula_ocr
+
+
 
 def get_direktorioko_irudiak(sarrera_direktorioa):
     irudien_lista = filter(lambda x: os.path.join(sarrera_direktorioa, x).lower().endswith(('.png', '.jpg', '.jpeg')),
@@ -38,6 +43,7 @@ def predikzioak_burutu(sarrera_direktorioa, modeloaren_izena, mozketa_azalera=20
     model = YOLO(modeloaren_izena)
     def predikzioa_burutu(fitxategi_helbide_osoa):
         predikzio_emaitza = model.predict(fitxategi_helbide_osoa, verbose=False)[0]
+        print(predikzio_emaitza)
         for det in  predikzio_emaitza.boxes:
             #if int(det.cls)  in [0, 1, 2, 3, 5, 7 ]:
             x1, y1, x2, y2 = map(int, det[0].xyxy[0])  # det.xyxy gives the box coordinates
@@ -53,17 +59,18 @@ def predikzioak_burutu(sarrera_direktorioa, modeloaren_izena, mozketa_azalera=20
 def predikzioak_burutu_obb(sarrera_direktorioa, modeloaren_izena, mozketa_azalera=200000):
     model = YOLO(modeloaren_izena)
     def predikzioa_burutu(fitxategi_helbide_osoa):
-        predikzio_emaitza = model.predict(fitxategi_helbide_osoa, verbose=False)[0]
-        for det in  predikzio_emaitza.obb:
-            #if int(det.cls)  in [0, 1, 2, 3, 5, 7 ]:
-            #a1, a1, a3, a4 =  det[0].xyxyxyxy[0].detach().numpy()
-            #bb_azalera = (x2 - x1) * (y2 - y1)
-            yield {"fitxategi_helbide_osoa": fitxategi_helbide_osoa,
-                   "irudi_originala": predikzio_emaitza.orig_img,
-                   "konfiantza": float(det.conf),
-                   "etiketa":  predikzio_emaitza.names[int(det.cls)],
-                   "coord": det.xyxyxyxy[0].detach().numpy(),
-                   "bb_azalera": 0}
+        predikzio_emaitza = model.predict(fitxategi_helbide_osoa, verbose=False)[0].cpu()
+        obb = predikzio_emaitza.obb
+        for i in range(len(obb.conf)):
+            yield {
+                "fitxategi_helbide_osoa": fitxategi_helbide_osoa,
+                "irudi_originala": predikzio_emaitza.orig_img,
+                "konfiantza": obb.conf[i].item(),
+                "etiketa": predikzio_emaitza.names[int(obb.cls[i].item())],
+                "coord": obb.xyxyxyxy[i].numpy(),
+                "bb_azalera": 0
+            }
+            
     return chain.from_iterable(map(predikzioa_burutu, get_direktorioko_irudiak(sarrera_direktorioa)))
 
 
@@ -77,11 +84,17 @@ def predikzioa_margoztu_obb(irudi_originala, coord, etiketa, konfiantza, irteera
 def predikzioak_margoztu_obb(predikzio_hiztegia, sarrera_direktorio_helbidea, irteera_direktorio_izena, konfiantza_minimoa=0.4):
     helburu_direktorio_helbidea = sarrera_direktorio_helbidea + "/" + irteera_direktorio_izena
     Path(helburu_direktorio_helbidea).mkdir(parents=True, exist_ok=True)
+    i=1
     for p in predikzio_hiztegia:
         if p["konfiantza"]>0.4:
             helbide_zatitua = os.path.split(p["fitxategi_helbide_osoa"])
-            helburu_bide_izena = helburu_direktorio_helbidea + "/" + helbide_zatitua[1]
-            predikzioa_margoztu_obb(p['irudi_originala'], p["coord"], p["etiketa"], p["konfiantza"], helburu_bide_izena)    
+            helburu_bide_izena = helburu_direktorio_helbidea + "/"+str(i) + helbide_zatitua[1]
+            cv2.imwrite(helburu_bide_izena,matrikula_ocr.preprocess_for_ocr(matrikula_ocr.get_perspective_transform(p["irudi_originala"], p["coord"])))
+            text = ocr_plate(p["irudi_originala"], p["coord"])
+            print(helbide_zatitua[1], text)
+            i+=1
+            #predikzioa_margoztu_obb(p['irudi_originala'], p["coord"], p["etiketa"], p["konfiantza"], helburu_bide_izena)
+            
 
 def predikzioa_margoztu(irudi_originala, x1, y1, x2, y2, etiketa, konfiantza, irteera_helbidea):
     detekzio_irudia = cv2.rectangle(irudi_originala, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 2)
@@ -93,6 +106,7 @@ def predikzioak_margoztu(predikzio_hiztegia, sarrera_direktorio_helbidea, irteer
     helburu_direktorio_helbidea = sarrera_direktorio_helbidea + "/" + irteera_direktorio_izena
     Path(helburu_direktorio_helbidea).mkdir(parents=True, exist_ok=True)
     for p in predikzio_hiztegia:
+        print(p)
         if p["konfiantza"]>0.4:
             helbide_zatitua = os.path.split(p["fitxategi_helbide_osoa"])
             helburu_bide_izena = helburu_direktorio_helbidea + "/" + helbide_zatitua[1]
@@ -168,4 +182,99 @@ def draw_label_and_confidence_4points(image, label, confidence, points):
     cv2.putText(image, label_text, (text_x, text_y), font, font_scale, color, thickness, lineType=cv2.LINE_AA)
 
     return image
+
+
+# def order_points(pts):
+#     rect = numpy.zeros((4, 2), dtype="float32")
+
+#     s = pts.sum(axis=1)
+#     rect[0] = pts[numpy.argmin(s)]  # top-left
+#     rect[2] = pts[numpy.argmax(s)]  # bottom-right
+
+#     diff = numpy.diff(pts, axis=1)
+#     rect[1] = pts[numpy.argmin(diff)]  # top-right
+#     rect[3] = pts[numpy.argmax(diff)]  # bottom-left
+
+#     return rect
+def order_points(pts):
+    rect = cv2.minAreaRect(pts)
+    box = cv2.boxPoints(rect)
+    return numpy.array(box, dtype="float32")
+
+def crop_expanded_aabb(image, obb_points, margin_ratio=0.05):
+    """
+    image: original image
+    obb_points: numpy array shape (4,2)
+    margin_ratio: how much to expand (0.15 = 15%)
+    """
+
+    xs = obb_points[:, 0]
+    ys = obb_points[:, 1]
+
+    # Axis-aligned bounding box
+    x_min = numpy.min(xs)
+    x_max = numpy.max(xs)
+    y_min = numpy.min(ys)
+    y_max = numpy.max(ys)
+
+    width = x_max - x_min
+    height = y_max - y_min
+
+    # Add margin
+    x_min -= width * margin_ratio
+    x_max += width * margin_ratio
+    y_min -= height * margin_ratio
+    y_max += height * margin_ratio
+
+    # Clip to image bounds
+    h_img, w_img = image.shape[:2]
+
+    x_min = max(0, int(x_min))
+    x_max = min(w_img, int(x_max))
+    y_min = max(0, int(y_min))
+    y_max = min(h_img, int(y_max))
+    cv2.rectangle(
+        image,
+        (x_min, y_min),
+        (x_max, y_max),
+        (0, 0, 255),  # red
+        2
+    )
+    return image[y_min:y_max, x_min:x_max]
+
+
+def ocr_plate(image, coord):
+    
+    plate_img = crop_expanded_aabb(image, coord)
+    #plate_img = cv2.resize(image, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
+    gray_plate = cv2.cvtColor(plate_img, cv2.COLOR_BGR2GRAY)
+    # Equalize histogram
+    gray_plate = cv2.equalizeHist(gray_plate)
+    # gray_plate = cv2.GaussianBlur(gray_plate, (5, 5), 0)
+    reader = easyocr.Reader(['en'])
+    result = reader.readtext(gray_plate, detail=0, paragraph=False)
+    
+    #text_results = [item[1] for item in result]
+
+    return  result #text_results
+    # target_height = 80
+    # scale = target_height / plate_img.shape[0]
+    # plate_img = cv2.resize(plate_img, None, fx=scale, fy=scale,
+    #                        interpolation=cv2.INTER_CUBIC)
+
+    # gray = cv2.cvtColor(plate_img, cv2.COLOR_BGR2GRAY)
+    # gray = cv2.bilateralFilter(gray, 9, 75, 75)
+
+   
+    # # gray = cv2.threshold(gray, 0, 255,
+    # #                      cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+
+    # text = pytesseract.image_to_string(
+    #     gray,
+    #     config="--psm 7 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    # )
+
+    # return text.strip()
+
+
 

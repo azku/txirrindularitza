@@ -1,0 +1,8 @@
+ultralytics
+pandas
+albumentations
+imutils
+opencv-python
+debugpy
+pytesseract
+paddleocr

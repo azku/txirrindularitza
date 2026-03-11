@@ -15,7 +15,6 @@ Emaitzetan, irudiaren helbidea, balio mota, konfiantza eta objectuaren detekzio 
 ## Aurre-ezarpenak
 Argazki originalak direktorio batean egon beharko dira. Kode hau exekutatzeko, python ingurune bat izan beharko dugu  Ultralyticsen YOLO v8 eta ``imutils`` paketeak instalatuta daudelarik. 
 
-Programak, helburu bezala konfiguratu daitekeen direktorio batean irudiak iraulita kopiatzen ditu. Ondoren objektuak identifikatzeko modeloa aplikatzen zaie eta irudi bakoitzaren emaitzak ``detekzio_emaitzak.csv`` izeneko fitxategian utziko dira helburu direktorio horretan. Irudiei detekzioak marraztuko zaizkie.
+## Prozesu orokorra
 
-## Matrikula entrenamendua
-
+Ideia nagusia lehenengo ibilgailuak detektatzea litzateke. Detekzioak dauden irudietan matrikula detekzioa erabili genezake. Azken hau OBB oriented Bounding Box erabiliko luke eta hau ez da egokia gero matrikula irakurtzeko. Beraz, OBB emaitza horietatik abiatuz perspektiba transformazioa egin beharko dugu orientazio zuzena izan dezan koadroak. Azkenik, emaitza horretan OCR egingo genuke.
